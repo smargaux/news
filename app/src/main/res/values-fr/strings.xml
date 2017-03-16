@@ -6,5 +6,6 @@
 <string name="news_2_title">"One Plus et Meizu trichent avec les benchmarks, nous avons lancés nos tests techniques"</string>
     <string name="pref_categories">Catégories</string>
     <string name="last_news">Derniers articles</string>
-
+    <string name="notif_title">Notification</string>
+    <string name="notif_content">voici une nouvelle notification</string>
 </resources>

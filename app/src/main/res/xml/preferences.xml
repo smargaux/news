@@ -8,4 +8,11 @@
         android:entryValues="@array/pref_categories_values"
         android:defaultValue="@array/pref_categories_entries"
         />
+    <EditTextPreference
+        android:key="pref_notification"
+        android:title="@string/notif_title"
+        android:defaultValue="@string/notif_content"
+        >
+
+    </EditTextPreference>
 </PreferenceScreen>

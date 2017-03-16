@@ -1,11 +1,18 @@
 package com.example.msmits.helloworld;
 
+import android.app.NotificationManager;
+import android.app.PendingIntent;
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
+import android.support.v4.app.NotificationCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.webkit.WebView;
@@ -53,8 +60,27 @@ public class MainActivity extends AppCompatActivity implements OnListItemClickLi
             viewPager.setAdapter(new myPagerAdapter(getSupportFragmentManager(),this,categories));
         }
 
+        // On récupère les préferences
+        SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(this);
+        String notification = pref.getString("pref_notification",getResources().getString(R.string.notif_title));
+        Intent notificationIntent = new Intent(getApplicationContext(), MainActivity.class);
+        PendingIntent contentIntent = PendingIntent.getActivity(this, 0, notificationIntent, 0);
+
+        Log.i("Notification ",notification);
+
+        // On crée la notification
+        NotificationCompat.Builder builder =
+                new NotificationCompat.Builder(this)
+                        .setSmallIcon(R.drawable.bookmark_plus_outline)
+                        .setContentTitle(getResources().getString(R.string.app_name))
+                        .setContentText(notification)
+                        .setContentIntent(contentIntent);
 
 
+
+        // Notification manager
+        NotificationManager notificationManager = (NotificationManager) this.getSystemService(Context.NOTIFICATION_SERVICE);
+        notificationManager.notify((int)System.currentTimeMillis(), builder.build());
         //LinearLayoutManager layoutManager=new LinearLayoutManager(this);
 
         //setContentView(R.layout.activity_main);
