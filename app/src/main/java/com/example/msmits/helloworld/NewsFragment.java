@@ -5,25 +5,31 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
 import java.util.ArrayList;
 
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+import retrofit2.Retrofit;
+import retrofit2.converter.jackson.JacksonConverterFactory;
+
 
 public class NewsFragment
 extends android.support.v4.app.Fragment implements OnListItemClickListener{
     private ArrayList<News> list_news = new ArrayList<News>();
-    private ArrayList<News> category_news = new ArrayList<News>();
     private int position;
     private Bundle bundle;
+    private ArrayList<Post> category_posts = new ArrayList<Post>();
+    private OnListItemClickListener listener;
     String category;
-    public  static NewsFragment newInstance(String category) {
+    public  static NewsFragment newInstance(int category) {
         NewsFragment fragment = new NewsFragment();
         Bundle bundle = new Bundle();
-        bundle.putString("category", category);
+        bundle.putInt("category", category);
         fragment.setArguments(bundle);
         return fragment;
     }
@@ -44,28 +50,36 @@ extends android.support.v4.app.Fragment implements OnListItemClickListener{
 
         GridLayoutManager layoutManager =new GridLayoutManager(getActivity().getApplicationContext(),getResources().getInteger(R.integer.columns));
 
-        RecyclerView rView = (RecyclerView) getView().findViewById(R.id.recycleListView);
+       final RecyclerView rView = (RecyclerView) getView().findViewById(R.id.recycleListView);
         rView.setLayoutManager(layoutManager);
+
         bundle=getArguments();
-        String currentCategory=bundle.getString("category");
-        News news1=new News("Premier Article","Super j'ai créer mon premier article","News","23 novembre 2016",3,false,"<html><head><title>Premier Article</title></head><body><h1>Hello 1 </h1></body></html>");
-        list_news.add(news1);
-        News news2=new News("Deuxième Article","Super j'ai créer mon deuxième article","News","15 novembre 2016",12,true,"<html><head><title>Deuxième Article</title></head><body><h1>Hello 2 </h1></body></html>");
-        list_news.add(news2);
-        News news3=new News("Troisème Article","Super j'ai créer mon troisième article","News","13 novembre 2016",12,true,"<html><head><title>Troisème Article</title></head><body><h1>Hello 3 </h1></body></html>");
-        list_news.add(news3);
-        News news4=new News("Troisème Article","Super j'ai créer mon troisième article","Tutos","13 novembre 2016",3,false,"<html><head><title>Troisème Article</title></head><body><h1>Hello 3 </h1></body></html>");
-        list_news.add(news4);
-        category_news.clear();
-        for (int i = 0; i < list_news.size(); i++) {
-            category=list_news.get(i).getCategory().toString();
-            if(category.equalsIgnoreCase(currentCategory)){
-                category_news.add(list_news.get(i));
-            }else{
+        int currentCategory=bundle.getInt("category");
+
+        // On récupère les catégories
+        Retrofit retrofit = new Retrofit.Builder()
+                .baseUrl("https://www.goglasses.fr/")
+                .addConverterFactory(
+                        JacksonConverterFactory.create())
+                .build();
+        API api = retrofit.create(API.class);
+        Call<ResponsePostsByCategory> call = api.getPostsByCategory(currentCategory);
+        call.enqueue(new Callback<ResponsePostsByCategory>() {
+            @Override
+            public void onResponse(Call<ResponsePostsByCategory> call, Response<ResponsePostsByCategory> response) {
+                ResponsePostsByCategory reponseCategory = response.body();
+
+                category_posts=reponseCategory.posts;
+
+                rView.setAdapter(new myAdapter(category_posts,listener));
             }
-        }
-        Log.i("News news",category_news.toString());
-        rView.setAdapter(new myAdapter(category_news,this));
+
+            @Override
+            public void onFailure(Call<ResponsePostsByCategory> call, Throwable t) {
+
+            }
+        });
+
 
 
 

@@ -19,8 +19,17 @@ import android.webkit.WebView;
 
 import java.util.ArrayList;
 
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+import retrofit2.Retrofit;
+import retrofit2.converter.jackson.JacksonConverterFactory;
+
 public class MainActivity extends AppCompatActivity implements OnListItemClickListener{
     private ArrayList<News> list_news = new ArrayList<News>();
+    private ArrayList<Category> categories_list=new ArrayList<Category>();
+    private ArrayList<Post> last_posts=new ArrayList<Post>();
+    private OnListItemClickListener listener;
     private int position;
     WebView webView;
 
@@ -40,9 +49,30 @@ public class MainActivity extends AppCompatActivity implements OnListItemClickLi
             News news4=new News("Troisème Article","Super j'ai créer mon troisième article","Tutos","13 novembre 2016",3,false,"<html><head><title>Troisème Article</title></head><body><h1>Hello 3 </h1></body></html>");
             list_news.add(news4);
             LinearLayoutManager layoutManager =new LinearLayoutManager(this);
-            RecyclerView rView = (RecyclerView) findViewById(R.id.recycleListView);
+            final RecyclerView rView = (RecyclerView) findViewById(R.id.recycleListView);
             rView.setLayoutManager(layoutManager);
-            rView.setAdapter(new myAdapter(list_news,this));
+            Retrofit retrofit = new Retrofit.Builder()
+                    .baseUrl("https://www.goglasses.fr/")
+                    .addConverterFactory(
+                            JacksonConverterFactory.create())
+                    .build();
+            API api = retrofit.create(API.class);
+            Call<ResponseLastPosts> call = api.getLastPosts();
+            call.enqueue(new Callback<ResponseLastPosts>() {
+                @Override
+                public void onResponse(Call<ResponseLastPosts> call, Response<ResponseLastPosts> response) {
+                    ResponseLastPosts reponseLastPosts= response.body();
+
+                    last_posts=reponseLastPosts.posts;
+
+                    rView.setAdapter(new myAdapter(last_posts,listener));
+                }
+
+                @Override
+                public void onFailure(Call<ResponseLastPosts> call, Throwable t) {
+
+                }
+            });
             webView =(WebView) findViewById(R.id.webview_fragment);
 
             // Paramètrage de la webview
@@ -52,12 +82,41 @@ public class MainActivity extends AppCompatActivity implements OnListItemClickLi
 
         }else{
             setContentView(R.layout.linear_layout);
-            ViewPager viewPager= (ViewPager)findViewById(R.id.pager);
-            ArrayList <String> categories= new ArrayList<String>();
-            categories.add("News");
-            categories.add("Tutos");
+            final ViewPager  viewPager= (ViewPager)findViewById(R.id.pager);
 
-            viewPager.setAdapter(new myPagerAdapter(getSupportFragmentManager(),this,categories));
+            // On récupère les catégories
+            Retrofit retrofit = new Retrofit.Builder()
+                    .baseUrl("https://www.goglasses.fr/")
+                    .addConverterFactory(
+                            JacksonConverterFactory.create())
+                    .build();
+            API api = retrofit.create(API.class);
+            Call<ReponseCategory> call = api.getCategories();
+            call.enqueue(new Callback<ReponseCategory>() {
+                             @Override
+                             public void onResponse(Call<ReponseCategory> call, Response<ReponseCategory> response) {
+                                 ReponseCategory reponseCategory = response.body();
+
+                                 categories_list=reponseCategory.categories;
+
+                                 viewPager.setAdapter(new myPagerAdapter(getSupportFragmentManager(),getApplicationContext(),categories_list));
+
+
+                             }
+
+                             @Override
+                             public void onFailure(Call<ReponseCategory> call, Throwable t) {
+
+                                 Log.i("Failure",t.toString());
+
+                             }
+                         });
+
+            /*ArrayList <String> categories= new ArrayList<String>();
+            categories.add("News");
+            categories.add("Tutos");*/
+            Log.i("Categories list 2 ",categories_list.toString());
+
         }
 
         // On récupère les préferences

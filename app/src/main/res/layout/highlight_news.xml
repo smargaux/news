@@ -18,7 +18,7 @@
             android:layout_height="wrap_content"
             android:id="@+id/header_h_news">
         <ImageView
-            android:id="@+id/image_h_news"
+            android:id="@+id/image_news"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:fitsSystemWindows="true"

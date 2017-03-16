@@ -5,11 +5,18 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
 import java.util.ArrayList;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+import retrofit2.Retrofit;
+import retrofit2.converter.jackson.JacksonConverterFactory;
 
 /**
  * Created by msmits on 15/03/2017.
@@ -18,7 +25,8 @@ import java.util.ArrayList;
 public class LastNewsFragment extends android.support.v4.app.Fragment implements OnListItemClickListener{
     private ArrayList<News> list_news = new ArrayList<News>();
     private int position;
-
+    private OnListItemClickListener listener;
+    private ArrayList<Post> last_posts= new ArrayList<Post>();
     public  static LastNewsFragment lastNewsFragmentInstance() {
         LastNewsFragment fragment = new LastNewsFragment();
         return fragment;
@@ -40,19 +48,36 @@ public class LastNewsFragment extends android.support.v4.app.Fragment implements
 
         GridLayoutManager layoutManager =new GridLayoutManager(getActivity().getApplicationContext(),getResources().getInteger(R.integer.columns));
 
-        RecyclerView rView = (RecyclerView) getView().findViewById(R.id.recycleListView);
-        list_news.clear();
+        final RecyclerView rView = (RecyclerView) getView().findViewById(R.id.recycleListView);
 
         rView.setLayoutManager(layoutManager);
-        News news1=new News("Premier Article","Super j'ai créer mon premier article","News","23 novembre 2016",3,false,"<html><head><title>Premier Article</title></head><body><h1>Hello 1 </h1></body></html>");
-        list_news.add(news1);
-        News news2=new News("Deuxième Article","Super j'ai créer mon deuxième article","News","15 novembre 2016",12,true,"<html><head><title>Deuxième Article</title></head><body><h1>Hello 2 </h1></body></html>");
-        list_news.add(news2);
-        News news3=new News("Troisème Article","Super j'ai créer mon troisième article","News","13 novembre 2016",12,true,"<html><head><title>Troisème Article</title></head><body><h1>Hello 3 </h1></body></html>");
-        list_news.add(news3);
-        News news4=new News("Troisème Article","Super j'ai créer mon troisième article","Tutos","13 novembre 2016",3,false,"<html><head><title>Troisème Article</title></head><body><h1>Hello 3 </h1></body></html>");
-        list_news.add(news4);
-        rView.setAdapter(new myAdapter(list_news,this));
+        // On récupère les catégories
+        Retrofit retrofit = new Retrofit.Builder()
+                .baseUrl("https://www.goglasses.fr/")
+                .addConverterFactory(
+                        JacksonConverterFactory.create())
+                .build();
+        API api = retrofit.create(API.class);
+        Call<ResponseLastPosts> call = api.getLastPosts();
+        call.enqueue(new Callback<ResponseLastPosts>() {
+            @Override
+            public void onResponse(Call<ResponseLastPosts> call, Response<ResponseLastPosts> response) {
+                ResponseLastPosts reponseLastPosts= response.body();
+
+                last_posts=reponseLastPosts.posts;
+                Log.i("Posts",last_posts.toString());
+
+                rView.setAdapter(new myAdapter(last_posts,listener));
+            }
+
+            @Override
+            public void onFailure(Call<ResponseLastPosts> call, Throwable t) {
+
+            }
+        });
+
+
+
 
 
 
