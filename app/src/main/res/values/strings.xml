@@ -1,0 +1,14 @@
+<resources>
+    <string name="app_name">News</string>
+    <string name="news_1_title">"Contre toute attente, le marché des montres connectées est en hausse en 2016"</string>
+    <string name="news_1_content">"Alors qu\'il ne se passait pas un mois en 2014 et 2015 sans que l'on entende parler d'une nouvelle montre connectée, l\'année 2016 et bla bla bla"</string>
+    <string name="news_2_title">"One Plus et Meizu trichent avec les benchmarks, nous avons lancés nos tests techniques"</string>
+    <string name="title_activity_details">DetailsActivity</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="pref_categories">Catégories</string>
+    <string name="preferences">Préférences</string>
+    <string name="last_news">Last news</string>
+
+</resources>

@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="pref_categories_values">
+        <item>htc-vive</item>
+        <item>htc-vive</item>
+        <item>realite-augmentee</item>
+        <item>realite-virtuelle</item>
+        <item>videos-360</item>
+    </string-array>
+
+    <string-array name="pref_categories_entries">
+        <item>HTC Vive</item>
+        <item>Oculus Rift</item>
+        <item>Réalité augmentée</item>
+        <item>Réalité virtuelle</item>
+        <item>Vidéos 360</item>
+    </string-array>
+</resources>

@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="colorPrimary">#9ED44B</color>
+    <color name="colorPrimaryDark">#FF79A339</color>
+    <color name="colorAccent">#40b3ff</color>
+    <color name="footerCard">#D1D1D1</color>
+    <color name="white">#FFFFFF</color>
+    <color name="blackTint">#77000000</color>
+</resources>
