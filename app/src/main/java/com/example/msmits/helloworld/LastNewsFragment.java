@@ -9,6 +9,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ProgressBar;
 
 import java.util.ArrayList;
 
@@ -26,6 +27,7 @@ public class LastNewsFragment extends android.support.v4.app.Fragment implements
     private ArrayList<News> list_news = new ArrayList<News>();
     private int position;
     private OnListItemClickListener listener;
+    ProgressBar loader;
      RecyclerView rView;
     private ArrayList<Post> last_posts= new ArrayList<Post>();
     public  static LastNewsFragment lastNewsFragmentInstance() {
@@ -49,11 +51,9 @@ public class LastNewsFragment extends android.support.v4.app.Fragment implements
         rView = (RecyclerView) view.findViewById(R.id.recycleListView);
         rView.setLayoutManager(layoutManager);
         rView.setHasFixedSize(true);
-        //rView.setVisibility(View.GONE);
 
 
-        //final ProgressBar loader=(ProgressBar) getView().findViewById(R.id.loader);
-        //loader.setVisibility(View.VISIBLE);
+        loader=(ProgressBar) getView().findViewById(R.id.loader);
         // On récupère les catégories
         Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl("https://www.goglasses.fr/")
@@ -71,12 +71,9 @@ public class LastNewsFragment extends android.support.v4.app.Fragment implements
                 Log.i("Lasts Posts",reponseLastPosts.toString());
 
                 rView.setAdapter(new myAdapter(last_posts,LastNewsFragment.this));
-                /*if(loader.getVisibility()==View.VISIBLE){
-                    loader.setVisibility(View.GONE);
-                    rView.setVisibility(View.VISIBLE);
+                loader.setVisibility(View.GONE);
+                rView.setVisibility(View.VISIBLE);
 
-
-                }*/
             }
 
             @Override

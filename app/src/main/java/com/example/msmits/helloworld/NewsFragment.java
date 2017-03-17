@@ -27,6 +27,9 @@ extends android.support.v4.app.Fragment implements OnListItemClickListener{
     private Bundle bundle;
     private ArrayList<Post> category_posts = new ArrayList<Post>();
     private OnListItemClickListener listener;
+    RecyclerView rView;
+    ProgressBar loader;
+
     public  static NewsFragment newInstance(Category category) {
         NewsFragment fragment = new NewsFragment();
         Bundle bundle = new Bundle();
@@ -51,10 +54,10 @@ extends android.support.v4.app.Fragment implements OnListItemClickListener{
 
         GridLayoutManager layoutManager =new GridLayoutManager(getActivity().getApplicationContext(),getResources().getInteger(R.integer.columns));
 
-       final RecyclerView rView = (RecyclerView) getView().findViewById(R.id.recycleListView);
+       rView = (RecyclerView) getView().findViewById(R.id.recycleListView);
         rView.setLayoutManager(layoutManager);
         //rView.setVisibility(View.GONE);
-        final ProgressBar loader=(ProgressBar) getView().findViewById(R.id.loader);
+        loader=(ProgressBar) getView().findViewById(R.id.loader);
 //        loader.setVisibility(View.VISIBLE);
         bundle=getArguments();
         int currentCategory=bundle.getInt("category");
@@ -76,12 +79,12 @@ extends android.support.v4.app.Fragment implements OnListItemClickListener{
                 category_posts=reponseCategory.posts;
 
                 rView.setAdapter(new myAdapter(category_posts,NewsFragment.this));
-                /*if(loader.getVisibility()==View.VISIBLE){
+                if(loader.getVisibility()==View.VISIBLE){
                     loader.setVisibility(View.GONE);
                     rView.setVisibility(View.VISIBLE);
 
 
-                }*/
+                }
             }
 
             @Override

@@ -111,31 +111,37 @@ public class MainActivity extends AppCompatActivity implements OnListItemClickLi
                                  SQLiteDatabase db=DataBaseHelper.getInstance(
                                          getApplicationContext()).getWritableDatabase();
 
-                                 String[] selected = categories.toArray(new String[] {});
-                                 Log.i("Categories checked",selected.toString());
-
-
+                                String[] all_categories=getResources().getStringArray(R.array.pref_categories_entries);
+                                 //On vérifie si des catégories ont déjà été enregistrées dans la bdd
+                                 String[] columns=new String[]{"SLUG"};
+                                 Cursor cursor = db.query("categories",columns,null,null,null,null,null);
+                                 int nb_categories=cursor.getCount();
+                                 Log.i("nb categories",String.valueOf(nb_categories));
                                  for (Category category:categories_list) {
                                      Log.i("Categories",category.slug);
-                                     Log.i("categories all",categories.toString());
-
-                                     if(Arrays.asList(selected).contains(category.slug)){
+                                     //On ajoute les catégories uniquement si il n'y en a aucune
+                                     if(nb_categories==0){
                                          Log.i("Category chosen",category.slug);
+                                         Log.i("Category chosen",all_categories[1]);
+                                         if(Arrays.asList().contains(category.slug)){
+                                             //Log.i("Category chosen",category.slug);
 
-                                         categories_chosen.add(category);
-                                         ContentValues category_values= new ContentValues();
-                                         category_values.put("SLUG", category.slug);
-                                         category_values.put("TITLE", category.title);
-                                         category_values.put("DESCRIPTION", category.description);
-                                         category_values.put("PARENT", category.parent);
-                                         category_values.put("POST_COUNT", category.post_count);
+                                             categories_chosen.add(category);
+                                             ContentValues category_values= new ContentValues();
+                                             category_values.put("SLUG", category.slug);
+                                             category_values.put("TITLE", category.title);
+                                             category_values.put("DESCRIPTION", category.description);
+                                             category_values.put("PARENT", category.parent);
+                                             category_values.put("POST_COUNT", category.post_count);
 
-                                         db.insert("categories",null,category_values);
-                                         Log.i("categories insert",category_values.toString());
+                                             db.insert("categories",null,category_values);
+                                             Log.i("categories insert",category_values.toString());
+                                         }
+                                     }else{
                                      }
+
                                  }
-                                 String[] columns=new String[]{"TITLE","SLUG"};
-                                 Cursor cursor = db.query("categories",columns,null,null,null,null,null);
+
 
                                  if (cursor.moveToFirst()) {
                                      do {
