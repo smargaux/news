@@ -6,6 +6,7 @@ package com.example.msmits.helloworld;
 
 import android.content.Context;
 import android.support.v7.widget.RecyclerView;
+import android.text.Html;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -56,6 +57,8 @@ public class myAdapter extends  RecyclerView.Adapter<RecyclerView.ViewHolder>  {
         private TextView titleView;
         private TextView descriptionView;
         private TextView commentsView;
+        private TextView authorView;
+
         private ImageView news_picture;
         private final OnListItemClickListener listener;
         private Context context;
@@ -66,23 +69,24 @@ public class myAdapter extends  RecyclerView.Adapter<RecyclerView.ViewHolder>  {
             descriptionView=(TextView)itemView.findViewById(R.id.content);
             commentsView=(TextView)itemView.findViewById(R.id.nb_comments);
             news_picture=(ImageView) itemView.findViewById(R.id.image_news);
-            Log.i("Image view",news_picture.toString());
+            authorView=(TextView) itemView.findViewById(R.id.news_author);
             titleView.setOnClickListener(this);
-            listener = l;
+            this.listener = l;
 
         }
         public void onClick(View v) {
             Log.i("Position",String.valueOf(getAdapterPosition()));
-            listener.onHeaderClicked(getAdapterPosition());
-            listener.onItemClicked(getAdapterPosition());
+            this.listener.onHeaderClicked(getAdapterPosition());
+            this.listener.onItemClicked(getAdapterPosition());
 
         }
-        void bindValue(String title,String description,int comments) {
+        void bindValue(String title,String description,int comments, String author,String img_url ) {
             titleView.setText(title);
-            descriptionView.setText(description);
+            descriptionView.setText(Html.fromHtml(description).toString());
             commentsView.setText(String.valueOf(comments));
+            authorView.setText(author);
             Picasso.with(context)
-                    .load("http://i.imgur.com/RRUe0Mo.png")
+                    .load(img_url)
                     .error(R.drawable.ic_share_variant_black_18dp)
                     .into(news_picture);
 
@@ -97,14 +101,21 @@ public class myAdapter extends  RecyclerView.Adapter<RecyclerView.ViewHolder>  {
         MyViewHolder simpleHolder = (MyViewHolder) holder;
 
         int viewType = getItemViewType(position);
-        if (viewType == highlight_news) {
-
-            highlightHolder.bindValue(posts.get(position).title,posts.get(position).content,posts.get(position).comments_count);
+        String img_url;
+       /* if (viewType == highlight_news) {
+            highlightHolder.bindValue(posts.get(position).title,posts.get(position).content,posts.get(position).comments_count,posts.get(position).thumbnail);
 
         } else {
-            simpleHolder.bindValue(posts.get(position).title,posts.get(position).content,posts.get(position).comments_count);
+            simpleHolder.bindValue(posts.get(position).title,posts.get(position).content,posts.get(position).comments_count,posts.get(position).thumbnail);
 
+        }*/
+        if(posts.get(position).thumbnail==null){
+            img_url="http://i.imgur.com/RRUe0Mo.png";
+        }else{
+            img_url=posts.get(position).thumbnail;
         }
+        simpleHolder.bindValue(posts.get(position).title,posts.get(position).content,posts.get(position).comments_count,posts.get(position).author.name,img_url);
+
     }
 
 

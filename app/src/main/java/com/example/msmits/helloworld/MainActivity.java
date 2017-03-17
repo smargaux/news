@@ -2,9 +2,12 @@ package com.example.msmits.helloworld;
 
 import android.app.NotificationManager;
 import android.app.PendingIntent;
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v4.app.NotificationCompat;
@@ -18,6 +21,8 @@ import android.view.MenuItem;
 import android.webkit.WebView;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Set;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -28,6 +33,8 @@ import retrofit2.converter.jackson.JacksonConverterFactory;
 public class MainActivity extends AppCompatActivity implements OnListItemClickListener{
     private ArrayList<News> list_news = new ArrayList<News>();
     private ArrayList<Category> categories_list=new ArrayList<Category>();
+    private ArrayList<Category> categories_chosen=new ArrayList<Category>();
+
     private ArrayList<Post> last_posts=new ArrayList<Post>();
     private OnListItemClickListener listener;
     private int position;
@@ -83,7 +90,6 @@ public class MainActivity extends AppCompatActivity implements OnListItemClickLi
         }else{
             setContentView(R.layout.linear_layout);
             final ViewPager  viewPager= (ViewPager)findViewById(R.id.pager);
-
             // On récupère les catégories
             Retrofit retrofit = new Retrofit.Builder()
                     .baseUrl("https://www.goglasses.fr/")
@@ -99,7 +105,49 @@ public class MainActivity extends AppCompatActivity implements OnListItemClickLi
 
                                  categories_list=reponseCategory.categories;
 
-                                 viewPager.setAdapter(new myPagerAdapter(getSupportFragmentManager(),getApplicationContext(),categories_list));
+                                 SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(MainActivity.this);
+                                 Set<String> categories = pref.getStringSet("pref_categories",null);
+                                 // On enregistre dans la BDD  les catégories issues des paramètres
+                                 SQLiteDatabase db=DataBaseHelper.getInstance(
+                                         getApplicationContext()).getWritableDatabase();
+
+                                 String[] selected = categories.toArray(new String[] {});
+                                 Log.i("Categories checked",selected.toString());
+
+
+                                 for (Category category:categories_list) {
+                                     Log.i("Categories",category.slug);
+                                     Log.i("categories all",categories.toString());
+
+                                     if(Arrays.asList(selected).contains(category.slug)){
+                                         Log.i("Category chosen",category.slug);
+
+                                         categories_chosen.add(category);
+                                         ContentValues category_values= new ContentValues();
+                                         category_values.put("SLUG", category.slug);
+                                         category_values.put("TITLE", category.title);
+                                         category_values.put("DESCRIPTION", category.description);
+                                         category_values.put("PARENT", category.parent);
+                                         category_values.put("POST_COUNT", category.post_count);
+
+                                         db.insert("categories",null,category_values);
+                                         Log.i("categories insert",category_values.toString());
+                                     }
+                                 }
+                                 String[] columns=new String[]{"TITLE","SLUG"};
+                                 Cursor cursor = db.query("categories",columns,null,null,null,null,null);
+
+                                 if (cursor.moveToFirst()) {
+                                     do {
+
+                                         Log.i("cursor",cursor.getString(cursor.getColumnIndex("TITLE")));
+
+                                     } while (cursor.moveToNext());
+                                 }
+                                 cursor.close();
+                                 db.close();
+
+                                 viewPager.setAdapter(new myPagerAdapter(getSupportFragmentManager(),getApplicationContext(),categories_chosen));
 
 
                              }

@@ -1,5 +1,7 @@
 package com.example.msmits.helloworld;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 import java.util.List;
 
 import retrofit2.Call;
@@ -15,10 +17,13 @@ public interface API {
         @GET("?json=get_category_index")
         Call<ReponseCategory> getCategories();
 
+
         @GET("?json=get_recent_posts")
+        @JsonIgnoreProperties(ignoreUnknown = true)
         Call<ResponseLastPosts> getLastPosts();
 
         @GET("?json=get_category_posts")
+        @JsonIgnoreProperties(ignoreUnknown = true)
         Call<ResponsePostsByCategory> getPostsByCategory(@Query("id") int id);
 
         @GET("?json=get_category_index&id={id}")

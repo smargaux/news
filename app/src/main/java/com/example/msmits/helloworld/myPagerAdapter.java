@@ -33,7 +33,7 @@ public class myPagerAdapter extends FragmentPagerAdapter {
         if(position==0){
             return lastNewsFragmentInstance();
         }else{
-            return newInstance(categories.get(position-1).id);
+            return newInstance(categories.get(position-1));
 
         }
 

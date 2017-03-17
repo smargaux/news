@@ -2,7 +2,7 @@
 <resources>
     <string-array name="pref_categories_values">
         <item>htc-vive</item>
-        <item>htc-vive</item>
+        <item>oculus-rift</item>
         <item>realite-augmentee</item>
         <item>realite-virtuelle</item>
         <item>videos-360</item>

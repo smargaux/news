@@ -5,9 +5,11 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ProgressBar;
 
 import java.util.ArrayList;
 
@@ -25,11 +27,10 @@ extends android.support.v4.app.Fragment implements OnListItemClickListener{
     private Bundle bundle;
     private ArrayList<Post> category_posts = new ArrayList<Post>();
     private OnListItemClickListener listener;
-    String category;
-    public  static NewsFragment newInstance(int category) {
+    public  static NewsFragment newInstance(Category category) {
         NewsFragment fragment = new NewsFragment();
         Bundle bundle = new Bundle();
-        bundle.putInt("category", category);
+        bundle.putInt("category", category.id);
         fragment.setArguments(bundle);
         return fragment;
     }
@@ -45,17 +46,20 @@ extends android.support.v4.app.Fragment implements OnListItemClickListener{
     }
 
     @Override
-    public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
+    public void onViewCreated(final View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
         GridLayoutManager layoutManager =new GridLayoutManager(getActivity().getApplicationContext(),getResources().getInteger(R.integer.columns));
 
        final RecyclerView rView = (RecyclerView) getView().findViewById(R.id.recycleListView);
         rView.setLayoutManager(layoutManager);
-
+        //rView.setVisibility(View.GONE);
+        final ProgressBar loader=(ProgressBar) getView().findViewById(R.id.loader);
+//        loader.setVisibility(View.VISIBLE);
         bundle=getArguments();
         int currentCategory=bundle.getInt("category");
 
+        Log.i("Catégorie id",String.valueOf(currentCategory));
         // On récupère les catégories
         Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl("https://www.goglasses.fr/")
@@ -68,14 +72,21 @@ extends android.support.v4.app.Fragment implements OnListItemClickListener{
             @Override
             public void onResponse(Call<ResponsePostsByCategory> call, Response<ResponsePostsByCategory> response) {
                 ResponsePostsByCategory reponseCategory = response.body();
-
+                Log.i("Posts",reponseCategory.toString());
                 category_posts=reponseCategory.posts;
 
-                rView.setAdapter(new myAdapter(category_posts,listener));
+                rView.setAdapter(new myAdapter(category_posts,NewsFragment.this));
+                /*if(loader.getVisibility()==View.VISIBLE){
+                    loader.setVisibility(View.GONE);
+                    rView.setVisibility(View.VISIBLE);
+
+
+                }*/
             }
 
             @Override
             public void onFailure(Call<ResponsePostsByCategory> call, Throwable t) {
+                Log.i("Failure posts by category",t.toString());
 
             }
         });
@@ -90,8 +101,7 @@ extends android.support.v4.app.Fragment implements OnListItemClickListener{
     public void onHeaderClicked(int position) {
 
         Intent intent = new Intent(getActivity().getApplicationContext(), DetailsActivity.class);
-        intent.putExtra("news", list_news.get(position));
-
+        intent.putExtra("post", category_posts.get(position));
         startActivity(intent);
 
     }
@@ -100,7 +110,7 @@ extends android.support.v4.app.Fragment implements OnListItemClickListener{
         // On enregistre la position
         this.position=position;
         Intent intent = new Intent(getActivity().getApplicationContext(), DetailsActivity.class);
-        intent.putExtra("news", list_news.get(position));
+        intent.putExtra("post", category_posts.get(position));
 
         startActivity(intent);
     }

@@ -3,17 +3,16 @@
     <string-array name="pref_categories_values">
         <item>htc-vive</item>
         <item>oculus-rift</item>
-        <item>augmented-reality</item>
-        <item>virtual-reality</item>
-        <item>360-videos</item>
-
+        <item>realite-augmentee</item>
+        <item>realite-virtuelle</item>
+        <item>videos-360</item>
     </string-array>
 
     <string-array name="pref_categories_entries">
         <item>HTC Vive</item>
         <item>Oculus Rift</item>
-        <item>Augmented reality</item>
-        <item>Virtual reality</item>
-        <item>360 videos</item>
+        <item>Réalité augmentée</item>
+        <item>Réalité virtuelle</item>
+        <item>Vidéos 360</item>
     </string-array>
 </resources>

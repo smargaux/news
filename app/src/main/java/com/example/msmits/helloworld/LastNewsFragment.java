@@ -26,6 +26,7 @@ public class LastNewsFragment extends android.support.v4.app.Fragment implements
     private ArrayList<News> list_news = new ArrayList<News>();
     private int position;
     private OnListItemClickListener listener;
+     RecyclerView rView;
     private ArrayList<Post> last_posts= new ArrayList<Post>();
     public  static LastNewsFragment lastNewsFragmentInstance() {
         LastNewsFragment fragment = new LastNewsFragment();
@@ -38,19 +39,21 @@ public class LastNewsFragment extends android.support.v4.app.Fragment implements
                              Bundle savedInstanceState)
     {
 
-        // Inflate the layout for this fragment
         return inflater.inflate(R.layout.fragment_news, container, false);
     }
 
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-
         GridLayoutManager layoutManager =new GridLayoutManager(getActivity().getApplicationContext(),getResources().getInteger(R.integer.columns));
-
-        final RecyclerView rView = (RecyclerView) getView().findViewById(R.id.recycleListView);
-
+        rView = (RecyclerView) view.findViewById(R.id.recycleListView);
         rView.setLayoutManager(layoutManager);
+        rView.setHasFixedSize(true);
+        //rView.setVisibility(View.GONE);
+
+
+        //final ProgressBar loader=(ProgressBar) getView().findViewById(R.id.loader);
+        //loader.setVisibility(View.VISIBLE);
         // On récupère les catégories
         Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl("https://www.goglasses.fr/")
@@ -65,13 +68,20 @@ public class LastNewsFragment extends android.support.v4.app.Fragment implements
                 ResponseLastPosts reponseLastPosts= response.body();
 
                 last_posts=reponseLastPosts.posts;
-                Log.i("Posts",last_posts.toString());
+                Log.i("Lasts Posts",reponseLastPosts.toString());
 
-                rView.setAdapter(new myAdapter(last_posts,listener));
+                rView.setAdapter(new myAdapter(last_posts,LastNewsFragment.this));
+                /*if(loader.getVisibility()==View.VISIBLE){
+                    loader.setVisibility(View.GONE);
+                    rView.setVisibility(View.VISIBLE);
+
+
+                }*/
             }
 
             @Override
             public void onFailure(Call<ResponseLastPosts> call, Throwable t) {
+                Log.i("Failure lasts posts",t.toString());
 
             }
         });
@@ -88,8 +98,7 @@ public class LastNewsFragment extends android.support.v4.app.Fragment implements
     public void onHeaderClicked(int position) {
 
         Intent intent = new Intent(getActivity().getApplicationContext(), DetailsActivity.class);
-        intent.putExtra("news", list_news.get(position));
-
+        intent.putExtra("post", last_posts.get(position));
         startActivity(intent);
 
     }
@@ -98,7 +107,7 @@ public class LastNewsFragment extends android.support.v4.app.Fragment implements
         // On enregistre la position
         this.position=position;
         Intent intent = new Intent(getActivity().getApplicationContext(), DetailsActivity.class);
-        intent.putExtra("news", list_news.get(position));
+        intent.putExtra("post", last_posts.get(position));
 
         startActivity(intent);
     }
