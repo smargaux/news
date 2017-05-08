@@ -62,7 +62,6 @@ extends android.support.v4.app.Fragment implements OnListItemClickListener{
         bundle=getArguments();
         int currentCategory=bundle.getInt("category");
 
-        Log.i("Catégorie id",String.valueOf(currentCategory));
         // On récupère les catégories
         Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl("https://www.goglasses.fr/")

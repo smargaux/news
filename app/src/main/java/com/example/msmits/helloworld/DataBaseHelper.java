@@ -28,9 +28,10 @@ public class DataBaseHelper extends SQLiteOpenHelper{
                     "DESCRIPTION VARCHAR(255),"+
                     "DATE VARCHAR(255),"+
                     "MODIFIED VARCHAR(255),"+
-                    "CONTENT LONG_TEXT"+
-                    "AUTHOR_ID INT"+
-                    "COMMENTS_COUNT INT"+
+                    "CONTENT LONG_TEXT,"+
+                    "AUTHOR_ID INT,"+
+                    "COMMENTS_COUNT INT,"+
+                    "FAVORITE BOOLEAN DEFAULT 0, "+
                     "PARENT int);";
     private final String CREATE_TABLE_AUTHOR =
             "CREATE TABLE authors (" +

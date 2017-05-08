@@ -8,4 +8,6 @@
     <string name="last_news">Derniers articles</string>
     <string name="notif_title">Notification</string>
     <string name="notif_content">voici une nouvelle notification</string>
+    <string name="favorites">Favoris</string>
+
 </resources>

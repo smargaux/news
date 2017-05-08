@@ -22,7 +22,12 @@ public class DetailsActivity extends AppCompatActivity {
         }
         WebView webView=(WebView) findViewById(R.id.webView);
         webView.getSettings().setJavaScriptEnabled(true);
-        webView.loadData(content, "text/html; charset=utf-8", "utf-8");
+        StringBuilder  html_content=new  StringBuilder();
+        // On charge le contenu avec la feuille de style pour améliorer l'affichage de l'article
+        html_content.append("<HTML><HEAD><LINK href=\"style.css\" type=\"text/css\" rel=\"stylesheet\"/></HEAD><body>");
+        html_content.append(content);
+        html_content.append("</body></HTML>");
+        webView.loadDataWithBaseURL("file:///android_asset/", html_content .toString(), "text/html; charset=utf-8", "utf-8", null);
         //webView.loadUrl(url);
     }
 

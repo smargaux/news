@@ -68,8 +68,6 @@ public class LastNewsFragment extends android.support.v4.app.Fragment implements
                 ResponseLastPosts reponseLastPosts= response.body();
 
                 last_posts=reponseLastPosts.posts;
-                Log.i("Lasts Posts",reponseLastPosts.toString());
-
                 rView.setAdapter(new myAdapter(last_posts,LastNewsFragment.this));
                 loader.setVisibility(View.GONE);
                 rView.setVisibility(View.VISIBLE);

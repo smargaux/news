@@ -4,4 +4,7 @@
     <string name="pref_categories">Categories</string>
     <string name="notif_title">Notification</string>
     <string name="notif_content">"here\'s a new notification"</string>
+    <string name="preferences">Preferences</string>
+    <string name="favorites">Favorites</string>
+
 </resources>

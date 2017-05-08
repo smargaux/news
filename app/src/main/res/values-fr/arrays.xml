@@ -5,7 +5,7 @@
         <item>oculus-rift</item>
         <item>realite-augmentee</item>
         <item>realite-virtuelle</item>
-        <item>videos-360</item>
+        <item>video-360</item>
     </string-array>
 
     <string-array name="pref_categories_entries">

@@ -4,13 +4,17 @@ package com.example.msmits.helloworld;
  * Created by msmits on 14/03/2017.
  */
 
+import android.content.ContentValues;
 import android.content.Context;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.support.v7.widget.RecyclerView;
 import android.text.Html;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -58,7 +62,7 @@ public class myAdapter extends  RecyclerView.Adapter<RecyclerView.ViewHolder>  {
         private TextView descriptionView;
         private TextView commentsView;
         private TextView authorView;
-
+        private ImageButton addToFaves;
         private ImageView news_picture;
         private final OnListItemClickListener listener;
         private Context context;
@@ -70,7 +74,9 @@ public class myAdapter extends  RecyclerView.Adapter<RecyclerView.ViewHolder>  {
             commentsView=(TextView)itemView.findViewById(R.id.nb_comments);
             news_picture=(ImageView) itemView.findViewById(R.id.image_news);
             authorView=(TextView) itemView.findViewById(R.id.news_author);
+            addToFaves=(ImageButton) itemView.findViewById(R.id.addFavorite);
             titleView.setOnClickListener(this);
+
             this.listener = l;
 
         }
@@ -80,17 +86,50 @@ public class myAdapter extends  RecyclerView.Adapter<RecyclerView.ViewHolder>  {
             this.listener.onItemClicked(getAdapterPosition());
 
         }
-        void bindValue(String title,String description,int comments, String author,String img_url ) {
+        void bindValue(final String title,  String  description , final int comments, String author, String img_url, final int author_id ) {
+            final String content;
             titleView.setText(title);
-            descriptionView.setText(Html.fromHtml(description).toString());
+            if(description==null){
+                content="";
+            }else{
+                content=description;
+            }
+            descriptionView.setText(Html.fromHtml(content).toString());
             commentsView.setText(String.valueOf(comments));
             authorView.setText(author);
+            Log.i("image ",img_url);
             Picasso.with(context)
                     .load(img_url)
                     .error(R.drawable.ic_share_variant_black_18dp)
                     .into(news_picture);
 
-
+            addToFaves.setOnClickListener(new View.OnClickListener()   {
+                // Au clic sur le bouton "add to favorites", on met à jour l'article dans la base de données ou on l'ajoute
+                public void onClick(View v)  {
+                    try {
+                        SQLiteDatabase db=DataBaseHelper.getInstance(
+                                v.getContext().getApplicationContext()).getWritableDatabase();
+                        ContentValues favorite= new ContentValues();
+                        favorite.put("FAVORITE", true);
+                        Log.i("Selected title",title);
+                        Cursor cursor=db.query("posts", null, "title = ?",new String[]{title},null,null,null,null);
+                        Log.i("Row count",String.valueOf(cursor.getCount()));
+                        int result=db.update("posts", favorite,"title = ?",new String[]{title});
+                        if(result==0){
+                            ContentValues post_values= new ContentValues();
+                            post_values.put("TITLE", title);
+                            post_values.put("DESCRIPTION",Html.fromHtml(content).toString());
+                            post_values.put("COMMENTS_COUNT", comments);
+                            post_values.put("FAVORITE", 1);
+                            post_values.put("AUTHOR_ID", author_id);
+                            db.insert("posts",null,post_values);
+                        }
+                        Log.i("Row affected",String.valueOf(result));
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+            });
         }
 
     }
@@ -102,6 +141,8 @@ public class myAdapter extends  RecyclerView.Adapter<RecyclerView.ViewHolder>  {
 
         int viewType = getItemViewType(position);
         String img_url;
+        String author_name;
+        int author_id;
        /* if (viewType == highlight_news) {
             highlightHolder.bindValue(posts.get(position).title,posts.get(position).content,posts.get(position).comments_count,posts.get(position).thumbnail);
 
@@ -114,7 +155,15 @@ public class myAdapter extends  RecyclerView.Adapter<RecyclerView.ViewHolder>  {
         }else{
             img_url=posts.get(position).thumbnail;
         }
-        simpleHolder.bindValue(posts.get(position).title,posts.get(position).content,posts.get(position).comments_count,posts.get(position).author.name,img_url);
+        if(posts.get(position).author!=null) {
+             author_name =posts.get(position).author.name;
+            author_id=posts.get(position).author.id;
+        }  else{
+             author_name="";
+             author_id=0;
+        }
+        Log.i("Post title",posts.get(position).title+" titrte");
+        simpleHolder.bindValue(posts.get(position).title,posts.get(position).content,posts.get(position).comments_count,author_name,img_url,author_id);
 
     }
 

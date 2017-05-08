@@ -7,6 +7,7 @@ import android.support.v4.app.FragmentPagerAdapter;
 
 import java.util.ArrayList;
 
+import static com.example.msmits.helloworld.FavoritesNewsFragment.favoritesNewsFragmentInstance;
 import static com.example.msmits.helloworld.LastNewsFragment.lastNewsFragmentInstance;
 import static com.example.msmits.helloworld.NewsFragment.newInstance;
 
@@ -26,14 +27,17 @@ public class myPagerAdapter extends FragmentPagerAdapter {
     }
     @Override
     public int getCount() {
-        return this.categories.size()+1;
+        return this.categories.size()+2;
     }
     @Override
     public Fragment getItem(int position) {
         if(position==0){
             return lastNewsFragmentInstance();
-        }else{
-            return newInstance(categories.get(position-1));
+        }else if(position==1){
+            return favoritesNewsFragmentInstance();
+        }
+        else{
+            return newInstance(categories.get(position-2));
 
         }
 
@@ -43,7 +47,10 @@ public class myPagerAdapter extends FragmentPagerAdapter {
         if(position==0){
             return context.getString(R.string.last_news);
         }
-        return this.categories.get(position-1).title;
+        else if(position==1){
+            return context.getString(R.string.favorites);
+        }
+        return this.categories.get(position-2).title;
     }
 
 

@@ -46,46 +46,89 @@ public class MainActivity extends AppCompatActivity implements OnListItemClickLi
         // On vérifie si l'appareil est un téléphone ou une tablette
         if(getResources().getBoolean(R.bool.isTablet)){
             setContentView(R.layout.activity_main_tablet);
-
-            News news1=new News("Premier Article","Super j'ai créer mon premier article","News","23 novembre 2016",3,false,"<html><head><title>Premier Article</title></head><body><h1>Hello 1 </h1></body></html>");
-            list_news.add(news1);
-            News news2=new News("Deuxième Article","Super j'ai créer mon deuxième article","News","15 novembre 2016",12,true,"<html><head><title>Deuxième Article</title></head><body><h1>Hello 2 </h1></body></html>");
-            list_news.add(news2);
-            News news3=new News("Troisème Article","Super j'ai créer mon troisième article","News","13 novembre 2016",12,true,"<html><head><title>Troisème Article</title></head><body><h1>Hello 3 </h1></body></html>");
-            list_news.add(news3);
-            News news4=new News("Troisème Article","Super j'ai créer mon troisième article","Tutos","13 novembre 2016",3,false,"<html><head><title>Troisème Article</title></head><body><h1>Hello 3 </h1></body></html>");
-            list_news.add(news4);
-            LinearLayoutManager layoutManager =new LinearLayoutManager(this);
-            final RecyclerView rView = (RecyclerView) findViewById(R.id.recycleListView);
-            rView.setLayoutManager(layoutManager);
+            setContentView(R.layout.linear_layout);
+            final ViewPager  viewPager= (ViewPager)findViewById(R.id.pager);
+            // On récupère les catégories
             Retrofit retrofit = new Retrofit.Builder()
                     .baseUrl("https://www.goglasses.fr/")
                     .addConverterFactory(
                             JacksonConverterFactory.create())
                     .build();
             API api = retrofit.create(API.class);
-            Call<ResponseLastPosts> call = api.getLastPosts();
-            call.enqueue(new Callback<ResponseLastPosts>() {
+            Call<ReponseCategory> call = api.getCategories();
+            call.enqueue(new Callback<ReponseCategory>() {
                 @Override
-                public void onResponse(Call<ResponseLastPosts> call, Response<ResponseLastPosts> response) {
-                    ResponseLastPosts reponseLastPosts= response.body();
+                public void onResponse(Call<ReponseCategory> call, Response<ReponseCategory> response) {
+                    ReponseCategory reponseCategory = response.body();
 
-                    last_posts=reponseLastPosts.posts;
+                    categories_list=reponseCategory.categories;
 
-                    rView.setAdapter(new myAdapter(last_posts,listener));
+                    // On récupère les catégories enregistrées dans les préférences
+                    SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(MainActivity.this);
+                    Set<String> categories = pref.getStringSet("pref_categories",null);
+
+                    // On enregistre dans la BDD  les catégories issues des paramètres
+                    SQLiteDatabase db=DataBaseHelper.getInstance(
+                            getApplicationContext()).getWritableDatabase();
+                    //On vérifie si des catégories ont déjà été enregistrées dans la bdd
+                    String[] columns=new String[]{"SLUG"};
+                    Cursor cursor = db.query("categories",columns,null,null,null,null,null);
+                    int nb_categories=cursor.getCount();
+                    for (Category category:categories_list) {
+                        //On ajoute les catégories uniquement si il n'y en a aucune dans la base de données
+                        if(categories!=null){
+                            Log.i("Current category",category.slug);
+                            Log.i("Is in array ",String.valueOf(categories.contains(category.slug)));
+                            if(categories.contains(category.slug)){
+                                categories_chosen.add(category);
+                                ContentValues category_values= new ContentValues();
+                                category_values.put("ID",category.id);
+                                category_values.put("SLUG", category.slug);
+                                category_values.put("TITLE", category.title);
+                                category_values.put("DESCRIPTION", category.description);
+                                category_values.put("PARENT", category.parent);
+                                category_values.put("POST_COUNT", category.post_count);
+
+                                db.insert("categories",null,category_values);
+                            }
+                        }else{
+                            if(cursor!=null && nb_categories > 0) {
+                                if (cursor.moveToFirst()) {
+                                    do {
+                                        // Si les catégories choisies sont dans la base de données
+                                        if (categories.contains(cursor.getString(0))) {
+                                            Category current_category = new Category();
+                                            current_category.slug = cursor.getString(0);
+                                            current_category.title = cursor.getString(1);
+                                            current_category.description = cursor.getString(2);
+                                            current_category.parent = cursor.getInt(3);
+                                            current_category.post_count = cursor.getInt(4);
+                                            categories_chosen.add(current_category);
+                                        }
+                                    } while (cursor.moveToNext());
+                                }
+                            }
+                        }
+
+                    }
+
+
+
+                    cursor.close();
+                    db.close();
+                    viewPager.setAdapter(new myPagerAdapter(getSupportFragmentManager(),getApplicationContext(),categories_chosen));
+
+
                 }
 
                 @Override
-                public void onFailure(Call<ResponseLastPosts> call, Throwable t) {
+                public void onFailure(Call<ReponseCategory> call, Throwable t) {
+
+                    Log.i("Failure",t.toString());
 
                 }
             });
-            webView =(WebView) findViewById(R.id.webview_fragment);
 
-            // Paramètrage de la webview
-            webView.getSettings().setJavaScriptEnabled(true);
-            // Par défault on affiche la première vue
-            webView.loadData(news1.getHtml(), "text/html; charset=utf-8", "utf-8");
 
         }else{
             setContentView(R.layout.linear_layout);
@@ -105,29 +148,26 @@ public class MainActivity extends AppCompatActivity implements OnListItemClickLi
 
                                  categories_list=reponseCategory.categories;
 
+                                 // On récupère les catégories enregistrées dans les préférences
                                  SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(MainActivity.this);
                                  Set<String> categories = pref.getStringSet("pref_categories",null);
+
                                  // On enregistre dans la BDD  les catégories issues des paramètres
                                  SQLiteDatabase db=DataBaseHelper.getInstance(
                                          getApplicationContext()).getWritableDatabase();
-
-                                String[] all_categories=getResources().getStringArray(R.array.pref_categories_entries);
                                  //On vérifie si des catégories ont déjà été enregistrées dans la bdd
                                  String[] columns=new String[]{"SLUG"};
                                  Cursor cursor = db.query("categories",columns,null,null,null,null,null);
                                  int nb_categories=cursor.getCount();
-                                 Log.i("nb categories",String.valueOf(nb_categories));
                                  for (Category category:categories_list) {
-                                     Log.i("Categories",category.slug);
-                                     //On ajoute les catégories uniquement si il n'y en a aucune
-                                     if(nb_categories==0){
-                                         Log.i("Category chosen",category.slug);
-                                         Log.i("Category chosen",all_categories[1]);
-                                         if(Arrays.asList().contains(category.slug)){
-                                             //Log.i("Category chosen",category.slug);
-
+                                     //On ajoute les catégories uniquement si il n'y en a aucune dans la base de données
+                                     if(categories!=null){
+                                         Log.i("Current category",category.slug);
+                                         Log.i("Is in array ",String.valueOf(categories.contains(category.slug)));
+                                         if(categories.contains(category.slug)){
                                              categories_chosen.add(category);
                                              ContentValues category_values= new ContentValues();
+                                             category_values.put("ID",category.id);
                                              category_values.put("SLUG", category.slug);
                                              category_values.put("TITLE", category.title);
                                              category_values.put("DESCRIPTION", category.description);
@@ -135,24 +175,32 @@ public class MainActivity extends AppCompatActivity implements OnListItemClickLi
                                              category_values.put("POST_COUNT", category.post_count);
 
                                              db.insert("categories",null,category_values);
-                                             Log.i("categories insert",category_values.toString());
                                          }
                                      }else{
+                                         if(cursor!=null && nb_categories > 0) {
+                                             if (cursor.moveToFirst()) {
+                                                 do {
+                                                     // Si les catégories choisies sont dans la base de données
+                                                     if (categories.contains(cursor.getString(0))) {
+                                                         Category current_category = new Category();
+                                                         current_category.slug = cursor.getString(0);
+                                                         current_category.title = cursor.getString(1);
+                                                         current_category.description = cursor.getString(2);
+                                                         current_category.parent = cursor.getInt(3);
+                                                         current_category.post_count = cursor.getInt(4);
+                                                         categories_chosen.add(current_category);
+                                                     }
+                                                 } while (cursor.moveToNext());
+                                             }
+                                         }
                                      }
 
                                  }
 
 
-                                 if (cursor.moveToFirst()) {
-                                     do {
 
-                                         Log.i("cursor",cursor.getString(cursor.getColumnIndex("TITLE")));
-
-                                     } while (cursor.moveToNext());
-                                 }
                                  cursor.close();
                                  db.close();
-
                                  viewPager.setAdapter(new myPagerAdapter(getSupportFragmentManager(),getApplicationContext(),categories_chosen));
 
 

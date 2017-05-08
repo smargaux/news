@@ -10,6 +10,7 @@
     <string name="pref_categories">Catégories</string>
     <string name="preferences">Préférences</string>
     <string name="last_news">Last news</string>
+    <string name="favorites">Favorites</string>
     <string name="notif_title">Notification</string>
     <string name="notif_content">voici une nouvelle notification</string>
 </resources>
