@@ -76,7 +76,6 @@ public class MainActivity extends AppCompatActivity implements OnListItemClickLi
                         // On récupère les catégories enregistrées dans les préférences
                         SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(MainActivity.this);
                         Set<String> categories = pref.getStringSet("pref_categories", null);
-                        Log.i("categories preferences",categories.toString());
                         // On enregistre dans la BDD  les catégories issues des paramètres
                         SQLiteDatabase db = DataBaseHelper.getInstance(
                                 getApplicationContext()).getWritableDatabase();
@@ -181,7 +180,6 @@ public class MainActivity extends AppCompatActivity implements OnListItemClickLi
                                  // On récupère les catégories enregistrées dans les préférences
                                  SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(MainActivity.this);
                                  Set<String> categories = pref.getStringSet("pref_categories",null);
-                                    Log.i("categories préférences",categories.toString());
                                  // On enregistre dans la BDD  les catégories issues des paramètres
                                  SQLiteDatabase db=DataBaseHelper.getInstance(
                                          getApplicationContext()).getWritableDatabase();
@@ -242,34 +240,11 @@ public class MainActivity extends AppCompatActivity implements OnListItemClickLi
                              }
                          });
 
-            /*ArrayList <String> categories= new ArrayList<String>();
-            categories.add("News");
-            categories.add("Tutos");*/
-            Log.i("Categories list 2 ",categories_list.toString());
+
 
         }
 
-        // On récupère les préferences
-        SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(this);
-        String notification = pref.getString("pref_notification",getResources().getString(R.string.notif_title));
-        Intent notificationIntent = new Intent(getApplicationContext(), MainActivity.class);
-        PendingIntent contentIntent = PendingIntent.getActivity(this, 0, notificationIntent, 0);
 
-        Log.i("Notification ",notification);
-
-        // On crée la notification
-        NotificationCompat.Builder builder =
-                new NotificationCompat.Builder(this)
-                        .setSmallIcon(R.drawable.bookmark_plus_outline)
-                        .setContentTitle(getResources().getString(R.string.app_name))
-                        .setContentText(notification)
-                        .setContentIntent(contentIntent);
-
-
-
-        // Notification manager
-        NotificationManager notificationManager = (NotificationManager) this.getSystemService(Context.NOTIFICATION_SERVICE);
-        notificationManager.notify((int)System.currentTimeMillis(), builder.build());
         //LinearLayoutManager layoutManager=new LinearLayoutManager(this);
 
         //setContentView(R.layout.activity_main);

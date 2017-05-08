@@ -87,7 +87,6 @@ public class myAdapter extends  RecyclerView.Adapter<RecyclerView.ViewHolder>  {
 
         }
         public void onClick(View v) {
-            Log.i("Position",String.valueOf(getAdapterPosition()));
             this.listener.onHeaderClicked(getAdapterPosition());
             this.listener.onItemClicked(getAdapterPosition());
 
@@ -103,7 +102,6 @@ public class myAdapter extends  RecyclerView.Adapter<RecyclerView.ViewHolder>  {
             descriptionView.setText(Html.fromHtml(content).toString());
             commentsView.setText(String.valueOf(comments));
             authorView.setText(author);
-            Log.i("image ",img_url);
             Picasso.with(context)
                     .load(img_url)
                     .error(R.drawable.ic_share_variant_black_18dp)
@@ -117,9 +115,7 @@ public class myAdapter extends  RecyclerView.Adapter<RecyclerView.ViewHolder>  {
                                 v.getContext().getApplicationContext()).getWritableDatabase();
                         ContentValues favorite= new ContentValues();
                         favorite.put("FAVORITE", true);
-                        Log.i("Selected title",title);
                         Cursor cursor=db.query("posts", null, "title = ?",new String[]{title},null,null,null,null);
-                        Log.i("Row count",String.valueOf(cursor.getCount()));
                         int result=db.update("posts", favorite,"title = ?",new String[]{title});
                         // Si le post ne fait pas parti de la base de données, on l'ajoute
                         if(result==0){
@@ -139,7 +135,6 @@ public class myAdapter extends  RecyclerView.Adapter<RecyclerView.ViewHolder>  {
             shareNews.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    Log.i("share ",title+" : "+url);
                     // Au clic sur le bouton de partage, on partage le titre de l'article ainsi que son url
                     Intent sharingIntent = new Intent(Intent.ACTION_SEND);
                     sharingIntent.putExtra(Intent.EXTRA_TEXT, title+" : "+url);
@@ -185,7 +180,6 @@ public class myAdapter extends  RecyclerView.Adapter<RecyclerView.ViewHolder>  {
         }  else{
             url ="";
         }
-        Log.i("Post title",posts.get(position).title+" titrte");
         simpleHolder.bindValue(posts.get(position).title,posts.get(position).content,posts.get(position).comments_count,author_name,img_url,author_id,url);
 
     }

@@ -65,15 +65,12 @@ public class FavoritesNewsFragment extends android.support.v4.app.Fragment imple
                 getActivity().getApplicationContext()).getWritableDatabase();
         String[] columns=new String[]{"FAVORITE"};
         Cursor cursor = db.query("posts",null,"FAVORITE=?",new String[] {"1"},null,null,null);
-        Log.i("Fave posts",String.valueOf(cursor.getCount()));
         if(cursor!=null && cursor.getCount()>0) {
             if (cursor.moveToFirst()) {
                 do {
                     // on ajoute les posts à la liste
                     Post fave_post = new Post();
-                    Log.i("1",cursor.getString(0));
-                    Log.i("2",cursor.getString(2));
-                    Log.i("4",cursor.getString(4));
+
                     fave_post.id=cursor.getInt(0);
                     fave_post.title = cursor.getString(2);
                     fave_post.content = cursor.getString(4);

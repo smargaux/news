@@ -74,7 +74,6 @@ extends android.support.v4.app.Fragment implements OnListItemClickListener{
             @Override
             public void onResponse(Call<ResponsePostsByCategory> call, Response<ResponsePostsByCategory> response) {
                 ResponsePostsByCategory reponseCategory = response.body();
-                Log.i("Posts",reponseCategory.toString());
                 category_posts=reponseCategory.posts;
 
                 rView.setAdapter(new myAdapter(category_posts,NewsFragment.this));
