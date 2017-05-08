@@ -1,6 +1,12 @@
 package com.example.msmits.helloworld;
 
+import android.content.ContentValues;
+import android.content.Context;
 import android.content.Intent;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.GridLayoutManager;
@@ -11,6 +17,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ProgressBar;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 
 import retrofit2.Call;
@@ -54,32 +61,81 @@ public class LastNewsFragment extends android.support.v4.app.Fragment implements
 
 
         loader=(ProgressBar) getView().findViewById(R.id.loader);
-        // On récupère les catégories
-        Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl("https://www.goglasses.fr/")
-                .addConverterFactory(
-                        JacksonConverterFactory.create())
-                .build();
-        API api = retrofit.create(API.class);
-        Call<ResponseLastPosts> call = api.getLastPosts();
-        call.enqueue(new Callback<ResponseLastPosts>() {
-            @Override
-            public void onResponse(Call<ResponseLastPosts> call, Response<ResponseLastPosts> response) {
-                ResponseLastPosts reponseLastPosts= response.body();
+        ConnectivityManager cm =
+                (ConnectivityManager)getContext().getSystemService(Context.CONNECTIVITY_SERVICE);
 
-                last_posts=reponseLastPosts.posts;
-                rView.setAdapter(new myAdapter(last_posts,LastNewsFragment.this));
-                loader.setVisibility(View.GONE);
-                rView.setVisibility(View.VISIBLE);
+        NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
+        boolean isConnected = activeNetwork != null && activeNetwork.isConnectedOrConnecting();
+        // Si il y a un réseau on utilise l'api pour charger les posts
+        if(isConnected){
+            // On récupère les derniers posts
+            Retrofit retrofit = new Retrofit.Builder()
+                    .baseUrl("https://www.goglasses.fr/")
+                    .addConverterFactory(
+                            JacksonConverterFactory.create())
+                    .build();
+            API api = retrofit.create(API.class);
+            Call<ResponseLastPosts> call = api.getLastPosts();
+            call.enqueue(new Callback<ResponseLastPosts>() {
+                @Override
+                public void onResponse(Call<ResponseLastPosts> call, Response<ResponseLastPosts> response) {
+                    ResponseLastPosts reponseLastPosts= response.body();
+                    SQLiteDatabase db=DataBaseHelper.getInstance(
+                            getContext()).getWritableDatabase();
+                    last_posts=reponseLastPosts.posts;
+                    // On ajoute les posts à la base de données
+                    for(Post post:last_posts){
+                        ContentValues post_values= new ContentValues();
+                        post_values.put("ID",post.id);
+                        post_values.put("SLUG", post.slug);
+                        post_values.put("TITLE", post.title);
+                        post_values.put("TITLE_PLAIN", post.title_plain);
+                        post_values.put("DESCRIPTION", post.content);
+                        post_values.put("DATE", post.date);
+                        post_values.put("MODIFIED", post.modified);
 
+                        post_values.put("COMMENTS_COUNT", post.comments_count);
+                        db.insert("posts",null,post_values);
+                    }
+                    rView.setAdapter(new myAdapter(last_posts,LastNewsFragment.this));
+                    loader.setVisibility(View.GONE);
+                    rView.setVisibility(View.VISIBLE);
+
+                }
+
+                @Override
+                public void onFailure(Call<ResponseLastPosts> call, Throwable t) {
+                    Log.i("Failure lasts posts",t.toString());
+
+                }
+            });
+        }else{
+            // On récupère les posts enregistrés dans la base de données
+            SQLiteDatabase db=DataBaseHelper.getInstance(
+                    getContext()).getWritableDatabase();
+            Cursor cursor=db.query("posts",null,null,null,null,null,"date","10");
+            if(cursor!=null && cursor.getCount() > 0) {
+                if (cursor.moveToFirst()) {
+                    do {
+                        Post post=new Post();
+                        post.id=cursor.getInt(0);
+                        post.slug=cursor.getString(1);
+                        post.title=cursor.getString(2);
+                        post.title_plain=cursor.getString(3);
+                        post.content=cursor.getString(4);
+                        post.date=cursor.getString(5);
+                        post.modified=cursor.getString(6);
+                        post.comments_count=cursor.getInt(7);
+                        last_posts.add(post);
+                    } while (cursor.moveToNext());
+                }
             }
+            cursor.close();
+            rView.setAdapter(new myAdapter(last_posts,LastNewsFragment.this));
+            loader.setVisibility(View.GONE);
+            rView.setVisibility(View.VISIBLE);
+        }
 
-            @Override
-            public void onFailure(Call<ResponseLastPosts> call, Throwable t) {
-                Log.i("Failure lasts posts",t.toString());
-
-            }
-        });
 
 
 

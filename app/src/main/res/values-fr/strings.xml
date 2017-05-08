@@ -9,5 +9,6 @@
     <string name="notif_title">Notification</string>
     <string name="notif_content">voici une nouvelle notification</string>
     <string name="favorites">Favoris</string>
+    <string name="share_to">Partager à</string>
 
 </resources>

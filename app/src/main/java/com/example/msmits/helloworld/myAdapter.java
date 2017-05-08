@@ -6,6 +6,7 @@ package com.example.msmits.helloworld;
 
 import android.content.ContentValues;
 import android.content.Context;
+import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.support.v7.widget.RecyclerView;
@@ -16,6 +17,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.ShareActionProvider;
 import android.widget.TextView;
 
 import com.squareup.picasso.Picasso;
@@ -63,7 +65,9 @@ public class myAdapter extends  RecyclerView.Adapter<RecyclerView.ViewHolder>  {
         private TextView commentsView;
         private TextView authorView;
         private ImageButton addToFaves;
+        private ImageButton shareNews;
         private ImageView news_picture;
+        private ShareActionProvider shareActionProviderButton;
         private final OnListItemClickListener listener;
         private Context context;
         MyViewHolder(View itemView,OnListItemClickListener l) {
@@ -74,7 +78,9 @@ public class myAdapter extends  RecyclerView.Adapter<RecyclerView.ViewHolder>  {
             commentsView=(TextView)itemView.findViewById(R.id.nb_comments);
             news_picture=(ImageView) itemView.findViewById(R.id.image_news);
             authorView=(TextView) itemView.findViewById(R.id.news_author);
-            addToFaves=(ImageButton) itemView.findViewById(R.id.addFavorite);
+            addToFaves=(ImageButton) itemView.findViewById(R.id.addBookmark);
+            shareNews=(ImageButton) itemView.findViewById(R.id.news_share);
+
             titleView.setOnClickListener(this);
 
             this.listener = l;
@@ -86,7 +92,7 @@ public class myAdapter extends  RecyclerView.Adapter<RecyclerView.ViewHolder>  {
             this.listener.onItemClicked(getAdapterPosition());
 
         }
-        void bindValue(final String title,  String  description , final int comments, String author, String img_url, final int author_id ) {
+        void bindValue(final String title,  String  description , final int comments, String author, String img_url, final int author_id, final String  url ) {
             final String content;
             titleView.setText(title);
             if(description==null){
@@ -130,6 +136,17 @@ public class myAdapter extends  RecyclerView.Adapter<RecyclerView.ViewHolder>  {
                     }
                 }
             });
+            shareNews.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Log.i("share ",title+" : "+url);
+                    // Au clic sur le bouton de partage, on partage le titre de l'article ainsi que son url
+                    Intent sharingIntent = new Intent(Intent.ACTION_SEND);
+                    sharingIntent.putExtra(Intent.EXTRA_TEXT, title+" : "+url);
+                    sharingIntent.setType("text/plain");
+                    v.getContext().startActivity(Intent.createChooser(sharingIntent, v.getResources().getText(R.string.share_to)));
+                }
+            });
         }
 
     }
@@ -142,6 +159,7 @@ public class myAdapter extends  RecyclerView.Adapter<RecyclerView.ViewHolder>  {
         int viewType = getItemViewType(position);
         String img_url;
         String author_name;
+        String url;
         int author_id;
        /* if (viewType == highlight_news) {
             highlightHolder.bindValue(posts.get(position).title,posts.get(position).content,posts.get(position).comments_count,posts.get(position).thumbnail);
@@ -162,8 +180,13 @@ public class myAdapter extends  RecyclerView.Adapter<RecyclerView.ViewHolder>  {
              author_name="";
              author_id=0;
         }
+        if(posts.get(position).url!=null) {
+            url =posts.get(position).url;
+        }  else{
+            url ="";
+        }
         Log.i("Post title",posts.get(position).title+" titrte");
-        simpleHolder.bindValue(posts.get(position).title,posts.get(position).content,posts.get(position).comments_count,author_name,img_url,author_id);
+        simpleHolder.bindValue(posts.get(position).title,posts.get(position).content,posts.get(position).comments_count,author_name,img_url,author_id,url);
 
     }
 

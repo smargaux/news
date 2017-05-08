@@ -14,6 +14,8 @@ public class DetailsActivity extends AppCompatActivity {
         Post post = getIntent().getExtras().getParcelable("post");
         String content=post.content;
         String title=post.title;
+        String date=post.date;
+        String author=post.author.name;
         setTitle(title);
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT)
@@ -25,6 +27,8 @@ public class DetailsActivity extends AppCompatActivity {
         StringBuilder  html_content=new  StringBuilder();
         // On charge le contenu avec la feuille de style pour améliorer l'affichage de l'article
         html_content.append("<HTML><HEAD><LINK href=\"style.css\" type=\"text/css\" rel=\"stylesheet\"/></HEAD><body>");
+        html_content.append("<h1>"+title+"</h1>");
+        html_content.append("<h2>"+author+", publié le "+date+"</h2>");
         html_content.append(content);
         html_content.append("</body></HTML>");
         webView.loadDataWithBaseURL("file:///android_asset/", html_content .toString(), "text/html; charset=utf-8", "utf-8", null);

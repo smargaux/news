@@ -8,6 +8,8 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v4.app.NotificationCompat;
@@ -48,87 +50,116 @@ public class MainActivity extends AppCompatActivity implements OnListItemClickLi
             setContentView(R.layout.activity_main_tablet);
             setContentView(R.layout.linear_layout);
             final ViewPager  viewPager= (ViewPager)findViewById(R.id.pager);
-            // On récupère les catégories
-            Retrofit retrofit = new Retrofit.Builder()
-                    .baseUrl("https://www.goglasses.fr/")
-                    .addConverterFactory(
-                            JacksonConverterFactory.create())
-                    .build();
-            API api = retrofit.create(API.class);
-            Call<ReponseCategory> call = api.getCategories();
-            call.enqueue(new Callback<ReponseCategory>() {
-                @Override
-                public void onResponse(Call<ReponseCategory> call, Response<ReponseCategory> response) {
-                    ReponseCategory reponseCategory = response.body();
+            ConnectivityManager cm =
+                    (ConnectivityManager)this.getSystemService(Context.CONNECTIVITY_SERVICE);
 
-                    categories_list=reponseCategory.categories;
+            NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
+            boolean isConnected = activeNetwork != null && activeNetwork.isConnectedOrConnecting();
+            // Si il y a un réseau on utilise l'api pour charger les posts
+            if(isConnected) {
+                // On récupère les catégories
+                Retrofit retrofit = new Retrofit.Builder()
+                        .baseUrl("https://www.goglasses.fr/")
+                        .addConverterFactory(
+                                JacksonConverterFactory.create())
+                        .build();
+                API api = retrofit.create(API.class);
+                Call<ReponseCategory> call = api.getCategories();
+                call.enqueue(new Callback<ReponseCategory>() {
+                    @Override
+                    public void onResponse(Call<ReponseCategory> call, Response<ReponseCategory> response) {
+                        ReponseCategory reponseCategory = response.body();
 
-                    // On récupère les catégories enregistrées dans les préférences
-                    SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(MainActivity.this);
-                    Set<String> categories = pref.getStringSet("pref_categories",null);
+                        categories_list = reponseCategory.categories;
 
-                    // On enregistre dans la BDD  les catégories issues des paramètres
-                    SQLiteDatabase db=DataBaseHelper.getInstance(
-                            getApplicationContext()).getWritableDatabase();
-                    //On vérifie si des catégories ont déjà été enregistrées dans la bdd
-                    String[] columns=new String[]{"SLUG"};
-                    Cursor cursor = db.query("categories",columns,null,null,null,null,null);
-                    int nb_categories=cursor.getCount();
-                    for (Category category:categories_list) {
-                        //On ajoute les catégories uniquement si il n'y en a aucune dans la base de données
-                        if(categories!=null){
-                            Log.i("Current category",category.slug);
-                            Log.i("Is in array ",String.valueOf(categories.contains(category.slug)));
-                            if(categories.contains(category.slug)){
-                                categories_chosen.add(category);
-                                ContentValues category_values= new ContentValues();
-                                category_values.put("ID",category.id);
-                                category_values.put("SLUG", category.slug);
-                                category_values.put("TITLE", category.title);
-                                category_values.put("DESCRIPTION", category.description);
-                                category_values.put("PARENT", category.parent);
-                                category_values.put("POST_COUNT", category.post_count);
+                        // On récupère les catégories enregistrées dans les préférences
+                        SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(MainActivity.this);
+                        Set<String> categories = pref.getStringSet("pref_categories", null);
 
-                                db.insert("categories",null,category_values);
-                            }
-                        }else{
-                            if(cursor!=null && nb_categories > 0) {
-                                if (cursor.moveToFirst()) {
-                                    do {
-                                        // Si les catégories choisies sont dans la base de données
-                                        if (categories.contains(cursor.getString(0))) {
-                                            Category current_category = new Category();
-                                            current_category.slug = cursor.getString(0);
-                                            current_category.title = cursor.getString(1);
-                                            current_category.description = cursor.getString(2);
-                                            current_category.parent = cursor.getInt(3);
-                                            current_category.post_count = cursor.getInt(4);
-                                            categories_chosen.add(current_category);
-                                        }
-                                    } while (cursor.moveToNext());
+                        // On enregistre dans la BDD  les catégories issues des paramètres
+                        SQLiteDatabase db = DataBaseHelper.getInstance(
+                                getApplicationContext()).getWritableDatabase();
+                        //On vérifie si des catégories ont déjà été enregistrées dans la bdd
+                        String[] columns = new String[]{"SLUG"};
+                        Cursor cursor = db.query("categories", columns, null, null, null, null, null);
+                        int nb_categories = cursor.getCount();
+                        for (Category category : categories_list) {
+                            //On ajoute les catégories uniquement si il n'y en a aucune dans la base de données
+                            if (categories != null) {
+                                Log.i("Current category", category.slug);
+                                Log.i("Is in array ", String.valueOf(categories.contains(category.slug)));
+                                if (categories.contains(category.slug)) {
+                                    categories_chosen.add(category);
+                                    ContentValues category_values = new ContentValues();
+                                    category_values.put("ID", category.id);
+                                    category_values.put("SLUG", category.slug);
+                                    category_values.put("TITLE", category.title);
+                                    category_values.put("DESCRIPTION", category.description);
+                                    category_values.put("PARENT", category.parent);
+                                    category_values.put("POST_COUNT", category.post_count);
+
+                                    db.insert("categories", null, category_values);
+                                }
+                            } else {
+                                if (cursor != null && nb_categories > 0) {
+                                    if (cursor.moveToFirst()) {
+                                        do {
+                                            // Si les catégories choisies sont dans la base de données
+                                            if (categories.contains(cursor.getString(0))) {
+                                                Category current_category = new Category();
+                                                current_category.slug = cursor.getString(0);
+                                                current_category.title = cursor.getString(1);
+                                                current_category.description = cursor.getString(2);
+                                                current_category.parent = cursor.getInt(3);
+                                                current_category.post_count = cursor.getInt(4);
+                                                categories_chosen.add(current_category);
+                                            }
+                                        } while (cursor.moveToNext());
+                                    }
                                 }
                             }
+
                         }
+
+
+                        cursor.close();
+                        db.close();
+                        viewPager.setAdapter(new myPagerAdapter(getSupportFragmentManager(), getApplicationContext(), categories_chosen));
+
 
                     }
 
+                    @Override
+                    public void onFailure(Call<ReponseCategory> call, Throwable t) {
 
+                        Log.i("Failure", t.toString());
 
-                    cursor.close();
-                    db.close();
-                    viewPager.setAdapter(new myPagerAdapter(getSupportFragmentManager(),getApplicationContext(),categories_chosen));
+                    }
+                });
 
-
+            }else{
+                SQLiteDatabase db = DataBaseHelper.getInstance(
+                        getApplicationContext()).getWritableDatabase();
+                Cursor cursor = db.query("categories", null, null, null, null, null, null);
+                SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(MainActivity.this);
+                Set<String> categories = pref.getStringSet("pref_categories", null);
+                if (cursor != null && cursor.getCount() > 0) {
+                    if (cursor.moveToFirst()) {
+                        do {
+                            // Si les catégories choisies sont dans la base de données
+                            if (categories.contains(cursor.getString(0))) {
+                                Category current_category = new Category();
+                                current_category.slug = cursor.getString(0);
+                                current_category.title = cursor.getString(1);
+                                current_category.description = cursor.getString(2);
+                                current_category.parent = cursor.getInt(3);
+                                current_category.post_count = cursor.getInt(4);
+                                categories_chosen.add(current_category);
+                            }
+                        } while (cursor.moveToNext());
+                    }
                 }
-
-                @Override
-                public void onFailure(Call<ReponseCategory> call, Throwable t) {
-
-                    Log.i("Failure",t.toString());
-
-                }
-            });
-
+            }
 
         }else{
             setContentView(R.layout.linear_layout);

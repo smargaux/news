@@ -79,16 +79,7 @@
                 android:layout_centerVertical="true"
                 />
 
-            <ImageButton
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_centerVertical="true"
-                android:id="@+id/addFavorite"
-                android:src="@drawable/ic_add_favorites"
-                android:padding="0dp"
-                android:layout_toLeftOf="@id/addBookmark"
-                android:layout_alignTop="@id/addBookmark"
-                />
+
             <ImageButton
                 android:id="@+id/addBookmark"
                 android:layout_width="wrap_content"
@@ -106,6 +97,8 @@
                 android:background="@null"
                 android:padding="2dp"
                 android:id="@+id/news_share"
+                android:actionProviderClass=
+                    "android.widget.ShareActionProvider"
                 android:layout_toLeftOf="@id/nb_comments"
                 android:layout_alignTop="@id/nb_comments"
                 android:src="@drawable/ic_share_variant_grey600_18dp" />
