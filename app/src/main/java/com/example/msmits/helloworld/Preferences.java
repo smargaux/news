@@ -71,7 +71,7 @@ public class Preferences extends PreferenceFragment  {
                         new NotificationCompat.Builder(getActivity())
                                 .setSmallIcon(R.drawable.bookmark_plus_outline)
                                 .setContentTitle(getResources().getString(R.string.app_name))
-                                .setContentText("Notification")
+                                .setContentText(newValue.toString())
                                 .setContentIntent(contentIntent);
 
 
