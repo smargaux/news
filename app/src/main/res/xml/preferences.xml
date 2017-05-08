@@ -6,7 +6,7 @@
         android:dialogTitle="@string/pref_categories"
         android:entries="@array/pref_categories_entries"
         android:entryValues="@array/pref_categories_values"
-        android:defaultValue="@array/pref_categories_entries"
+        android:defaultValue="@array/pref_categories_values"
         />
     <EditTextPreference
         android:key="pref_notification"

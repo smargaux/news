@@ -45,6 +45,7 @@ public class MainActivity extends AppCompatActivity implements OnListItemClickLi
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        PreferenceManager.setDefaultValues(this, R.xml.preferences,false);
         // On vérifie si l'appareil est un téléphone ou une tablette
         if(getResources().getBoolean(R.bool.isTablet)){
             setContentView(R.layout.activity_main_tablet);
@@ -75,7 +76,7 @@ public class MainActivity extends AppCompatActivity implements OnListItemClickLi
                         // On récupère les catégories enregistrées dans les préférences
                         SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(MainActivity.this);
                         Set<String> categories = pref.getStringSet("pref_categories", null);
-
+                        Log.i("categories preferences",categories.toString());
                         // On enregistre dans la BDD  les catégories issues des paramètres
                         SQLiteDatabase db = DataBaseHelper.getInstance(
                                 getApplicationContext()).getWritableDatabase();
@@ -86,8 +87,6 @@ public class MainActivity extends AppCompatActivity implements OnListItemClickLi
                         for (Category category : categories_list) {
                             //On ajoute les catégories uniquement si il n'y en a aucune dans la base de données
                             if (categories != null) {
-                                Log.i("Current category", category.slug);
-                                Log.i("Is in array ", String.valueOf(categories.contains(category.slug)));
                                 if (categories.contains(category.slug)) {
                                     categories_chosen.add(category);
                                     ContentValues category_values = new ContentValues();
@@ -182,7 +181,7 @@ public class MainActivity extends AppCompatActivity implements OnListItemClickLi
                                  // On récupère les catégories enregistrées dans les préférences
                                  SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(MainActivity.this);
                                  Set<String> categories = pref.getStringSet("pref_categories",null);
-
+                                    Log.i("categories préférences",categories.toString());
                                  // On enregistre dans la BDD  les catégories issues des paramètres
                                  SQLiteDatabase db=DataBaseHelper.getInstance(
                                          getApplicationContext()).getWritableDatabase();
@@ -193,8 +192,6 @@ public class MainActivity extends AppCompatActivity implements OnListItemClickLi
                                  for (Category category:categories_list) {
                                      //On ajoute les catégories uniquement si il n'y en a aucune dans la base de données
                                      if(categories!=null){
-                                         Log.i("Current category",category.slug);
-                                         Log.i("Is in array ",String.valueOf(categories.contains(category.slug)));
                                          if(categories.contains(category.slug)){
                                              categories_chosen.add(category);
                                              ContentValues category_values= new ContentValues();

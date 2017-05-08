@@ -121,6 +121,7 @@ public class myAdapter extends  RecyclerView.Adapter<RecyclerView.ViewHolder>  {
                         Cursor cursor=db.query("posts", null, "title = ?",new String[]{title},null,null,null,null);
                         Log.i("Row count",String.valueOf(cursor.getCount()));
                         int result=db.update("posts", favorite,"title = ?",new String[]{title});
+                        // Si le post ne fait pas parti de la base de données, on l'ajoute
                         if(result==0){
                             ContentValues post_values= new ContentValues();
                             post_values.put("TITLE", title);
@@ -130,7 +131,6 @@ public class myAdapter extends  RecyclerView.Adapter<RecyclerView.ViewHolder>  {
                             post_values.put("AUTHOR_ID", author_id);
                             db.insert("posts",null,post_values);
                         }
-                        Log.i("Row affected",String.valueOf(result));
                     } catch (Exception e) {
                         e.printStackTrace();
                     }

@@ -29,6 +29,8 @@ public class Preferences extends PreferenceFragment  {
 
         addPreferencesFromResource(R.xml.preferences);
         SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(getActivity());
+        PreferenceManager.setDefaultValues(getContext(), R.xml.preferences, false);
+
         Preference notification=(Preference)findPreference("pref_notification");
         Preference categories= (Preference)findPreference("pref_categories");
         /*notification.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {

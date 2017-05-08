@@ -95,7 +95,12 @@ public class LastNewsFragment extends android.support.v4.app.Fragment implements
                         post_values.put("MODIFIED", post.modified);
 
                         post_values.put("COMMENTS_COUNT", post.comments_count);
-                        db.insert("posts",null,post_values);
+                        int update_post=db.update("posts",post_values,"id=?",new String[]{String.valueOf(post.id)});
+                        // Si le post n'existe pas dans la base de données, on l'ajoute
+                        if(update_post==0){
+                            db.insert("posts",null,post_values);
+
+                        }
                     }
                     rView.setAdapter(new myAdapter(last_posts,LastNewsFragment.this));
                     loader.setVisibility(View.GONE);

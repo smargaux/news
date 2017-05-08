@@ -69,24 +69,21 @@ public class FavoritesNewsFragment extends android.support.v4.app.Fragment imple
         if(cursor!=null && cursor.getCount()>0) {
             if (cursor.moveToFirst()) {
                 do {
+                    // on ajoute les posts à la liste
                     Post fave_post = new Post();
                     Log.i("1",cursor.getString(0));
                     Log.i("2",cursor.getString(2));
-                 //   Log.i("3",cursor.getString(3));
                     Log.i("4",cursor.getString(4));
-                 //   Log.i("5",cursor.getString(5));
-//                    Log.i("6",cursor.getString(6));
-//                    Log.i("7",cursor.getString(7));
-                    fave_post.slug = cursor.getString(1);
+                    fave_post.id=cursor.getInt(0);
                     fave_post.title = cursor.getString(2);
-                    fave_post.title_plain = cursor.getString(3);
+                    fave_post.content = cursor.getString(4);
                     fave_post.date = cursor.getString(4);
                     fave_post.modified = cursor.getString(5);
                     Author author = new Author();
                     author.id = cursor.getInt(6);
                     fave_post.author = author;
                     fave_post.comments_count = cursor.getInt(6);
-                    fave_posts.add(new Post());
+                    fave_posts.add(fave_post);
 
                 } while (cursor.moveToNext());
             }
